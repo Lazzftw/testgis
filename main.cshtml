@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Main Page</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+      integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+      crossorigin=""
+    />
+    <style>
+      #map {
+        height: 700px;
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-body">
+              <div class="input-group">
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Search for..."
+                />
+                <span class="input-group-btn">
+                  <button class="btn btn-secondary" type="button">Go!</button>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-3">
+          <div class="card">
+            <div class="card-body">
+              <div id="map"></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-9">
+          <div class="card">
+            <div class="card-body">
+              <div class="row">
+                <div class="col-4">
+                  <div class="card">
+                    <div class="card-body">
+                      <div class="card">
+                        <div class="card-body">
+                          <h5 class="card-title">Layer 1</h5>
+                          <p class="card-text">Content for Layer 1</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="card">
+                    <div class="card-body">
+                      <div class="card">
+                        <div class="card-body">
+                          <h5 class="card-title">Layer 1</h5>
+                          <p class="card-text">Content for Layer 1</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="card">
+                    <div class="card-body">
+                      <div class="card">
+                        <div class="card-body">
+                          <h5 class="card-title">Layer 1</h5>
+                          <p class="card-text">Content for Layer 1</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script
+      src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+      integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+      integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+      integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+      integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+      crossorigin=""
+    ></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js">
+    </script>
+    <script type="text/javascript">
+      var map = L.map("map").setView([51.748458, 9.752246], 7);
+
+         $.getJSON('/GeoJSONData/bundeslaender-ohne-Meer.json', function (data) {
+        var statesLayer = L.geoJSON(data, {
+            style: function(feature) {
+                // define a style for the states
+                return {
+        fillColor: 'white',
+        weight: 2,
+        opacity: 1,
+        color: 'black',  //Outline color
+        fillOpacity: 0.7
+                };
+            }
+        });
+        // create a new layer group to hold the labels
+        var labelsLayer = L.layerGroup();
+        let names = new Set();
+        // loop through the states data and add a label for each state
+        data.features.forEach(function(feature) {
+               var center = L.polygon(feature.geometry.coordinates).getBounds().getCenter();
+               var centerLatLng = L.latLng(center.lng,center.lat);
+
+                   // Check if the name has already been processed
+                if (!names.has(feature.properties.GEN)) {
+                    names.add(feature.properties.GEN); // add it to the set
+                    var label = L.divIcon({
+                        className: "state-label",
+                        style:
+                        html: feature.properties.GEN
+                    });
+            var marker = L.marker(centerLatLng, { icon: label }).addTo(labelsLayer);
+                }
+        });
+        
+        statesLayer.addTo(map);
+        labelsLayer.addTo(map);
+
+        statesLayer.on('click', function(e) {
+            labelsLayer.remove();
+        var stateName = e.layer.feature.properties.GEN;
+        $.getJSON('/GeoJSONData/kreise.json', function (data) {
+            var citiesLayer = L.geoJSON(data, {
+
+                filter: function(feature) {
+                    return feature.properties.lan_name[0] === stateName;
+                },
+
+                onEachFeature: function (feature, layer) {
+                    var label = L.divIcon({
+                        className: "city-label",
+                        html: feature.properties.krs_name_short
+                    });
+                    var coords = L.latLng(feature.properties.geo_point_2d.lat, feature.properties.geo_point_2d.lon);
+                    layer.bindPopup(feature.properties.krs_name_short);
+                    var marker = L.marker(coords, {icon: label});
+                    marker.addTo(map);
+                },
+
+                style: function(feature) {
+                // define a style for the states
+                    return {
+                        fillColor: 'white',
+                        weight: 2,
+                        opacity: 1,
+                        color: 'black',  //Outline color
+                        fillOpacity: 0.7
+                                };
+                            }
+            });
+
+            citiesLayer.addTo(map);
+
+        });
+                    //map.zoomIn();
+    });
+    });
+
+    </script>
+  </body>
+</html>
